@@ -1,0 +1,49 @@
+import socket
+import threading
+import random
+
+# Replace these quotes with your desired quotes
+QUOTES = [
+    "Be yourself; everyone else is already taken. - Oscar Wilde",
+    "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe. - Albert Einstein",
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Life is what happens when you're busy making other plans. - John Lennon",
+    "In the end, it's not the years in your life that count. It's the life in your years. - Abraham Lincoln"
+]
+
+def handle_client(connection):
+    quote = random.choice(QUOTES)
+    connection.sendall(quote.encode())
+    connection.close()
+
+def main():
+    # Configure the server settings
+    host = "0.0.0.0"
+    port = 8888
+
+    # Create a socket object
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Bind the socket to the specified host and port
+    server_socket.bind((host, port))
+
+    # Listen for incoming connections (max 5 clients in queue)
+    server_socket.listen(5)
+
+    print(f"QOTD Server is listening on {host}:{port}")
+
+    try:
+        while True:
+            # Accept a client connection
+            client_socket, client_address = server_socket.accept()
+            print(f"Connection from {client_address[0]}:{client_address[1]}")
+
+            # Create a new thread to handle the client
+            client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+            client_thread.start()
+    except KeyboardInterrupt:
+        print("Server shutting down...")
+        server_socket.close()
+
+if __name__ == "__main__":
+    main()
